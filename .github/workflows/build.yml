@@ -27,10 +27,11 @@ jobs:
       - name: Unpack project
         shell: bash
         run: |
-          base64 -d project.tar.gz.b64 > project.tar.gz
+          cat chunks/v02_00.txt chunks/v02_01.txt chunks/v02_02.txt chunks/v02_03.txt chunks/v02_04.txt > project-v02.b64
+          base64 -d project-v02.b64 > project.tar.gz
+          gzip -t project.tar.gz
           tar -xzf project.tar.gz
-          rm project.tar.gz
-          sed -i 's/import net.minecraft.world.chunk.IChunkGenerator;/import net.minecraft.world.gen.IChunkGenerator;/' src/main/java/com/kokorin/industrialexpansion/world/WorldGenCopper.java
+          rm project-v02.b64 project.tar.gz
 
       - name: Build mod
         run: gradle --no-daemon clean build
@@ -43,6 +44,6 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: IndustrialExpansion-1.12.2-0.1.0
+          name: IndustrialExpansion-1.12.2-0.2.0
           path: build/libs/*.jar
           if-no-files-found: error
