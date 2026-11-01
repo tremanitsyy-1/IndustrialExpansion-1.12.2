@@ -24,7 +24,7 @@ jobs:
         with:
           gradle-version: '4.10.3'
 
-      - name: Unpack project
+      - name: Unpack base and v1.0 overlays
         shell: bash
         run: |
           cat chunks/v02_00.txt chunks/v02_01.txt chunks/v02_02.txt chunks/v02_03.txt chunks/v02_04.txt > project-v02.b64
@@ -33,17 +33,29 @@ jobs:
           tar -xzf project.tar.gz
           rm project-v02.b64 project.tar.gz
 
+          xz -t v10-code.tar.xz
+          tar -xJf v10-code.tar.xz
+
+          cat v1chunks/res_00.txt v1chunks/res_01.txt v1chunks/res_02.txt v1chunks/res_03.txt v1chunks/res_04.txt v1chunks/res_05.txt > v10-resources.b64
+          base64 -d v10-resources.b64 > v10-resources.tar.xz
+          xz -t v10-resources.tar.xz
+          tar -xJf v10-resources.tar.xz
+          rm v10-resources.b64 v10-resources.tar.xz
+
+          grep 'VERSION =' src/main/java/com/kokorin/industrialexpansion/IndustrialExpansion.java
+          find src/main/resources/assets/industrialexpansion -type f | wc -l
+
       - name: Build mod
         run: gradle --no-daemon clean build
 
       - name: Show built files
         if: always()
-        run: find build -maxdepth 3 -type f -print || true
+        run: find build/libs -maxdepth 1 -type f -print || true
 
       - name: Upload JAR
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: IndustrialExpansion-1.12.2-0.2.0
+          name: IndustrialExpansion-1.12.2-1.0.0
           path: build/libs/*.jar
           if-no-files-found: error
