@@ -30,6 +30,7 @@ jobs:
           base64 -d project.tar.gz.b64 > project.tar.gz
           tar -xzf project.tar.gz
           rm project.tar.gz
+          sed -i 's/import net.minecraft.world.chunk.IChunkGenerator;/import net.minecraft.world.gen.IChunkGenerator;/' src/main/java/com/kokorin/industrialexpansion/world/WorldGenCopper.java
 
       - name: Build mod
         run: gradle --no-daemon clean build
