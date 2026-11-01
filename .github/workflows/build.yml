@@ -1,0 +1,47 @@
+name: Build Industrial Expansion 1.12.2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Set up Gradle 4.10.3
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '4.10.3'
+
+      - name: Unpack project
+        shell: bash
+        run: |
+          base64 -d project.tar.gz.b64 > project.tar.gz
+          tar -xzf project.tar.gz
+          rm project.tar.gz
+
+      - name: Build mod
+        run: gradle --no-daemon clean build
+
+      - name: Show built files
+        if: always()
+        run: find build -maxdepth 3 -type f -print || true
+
+      - name: Upload JAR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: IndustrialExpansion-1.12.2-0.1.0
+          path: build/libs/*.jar
+          if-no-files-found: error
